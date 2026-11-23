@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="用狗狗照片和白底衣服图生成专属试穿照。">
+  <meta name="theme-color" content="#faf7f2">
+  <meta name="pawfit-api-mode" content="direct">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://api.apiyi.com; img-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'self'">
+  <title>宠物试衣间 · Pawfit</title>
+  <link rel="stylesheet" href="./style.css">
+  <script type="module" src="./app.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <span class="wordmark">
+        <span class="brand-icon icon" aria-hidden="true">pets</span>
+        Pawfit<span class="wordmark-dot">.</span>
+      </span>
+      <button class="button button-secondary settings-button" id="open-settings" type="button">
+        <span class="icon" aria-hidden="true">settings</span>
+        API 设置
+      </button>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section class="intro" aria-labelledby="page-title">
+      <h1 id="page-title">宠物<span>试衣间</span></h1>
+      <p>上传一张白底衣服图和一张狗狗照片，生成专属试穿照。</p>
+    </section>
+
+    <div class="workspace">
+      <section class="panel upload-panel" aria-labelledby="upload-title">
+        <div class="panel-header">
+          <div class="heading-icon"><span class="icon" aria-hidden="true">upload</span></div>
+          <h2 id="upload-title">上传素材</h2>
+        </div>
+
+        <form id="try-on-form" novalidate>
+          <div class="upload-fields">
+            <div class="upload-field" data-upload="clothing">
+              <h3 id="clothing-title">衣服图片</h3>
+              <div class="input-frame">
+                <input type="file" accept="image/png,image/jpeg,image/webp,.png,.jpg,.jpeg,.webp" hidden>
+                <button type="button" class="dropzone" aria-labelledby="clothing-title clothing-action" aria-describedby="clothing-hint clothing-error">
+                  <span class="slot-icon icon" aria-hidden="true">apparel</span>
+                  <img class="thumbnail" alt="" hidden>
+                  <span class="slot-copy">
+                    <span class="file-action" id="clothing-action">点击上传或拖入图片</span>
+                    <span class="file-hint" id="clothing-hint">建议用完整、清晰的白底服装图</span>
+                  </span>
+                </button>
+                <button type="button" class="icon-button remove-file" aria-label="移除衣服图片" hidden>
+                  <span class="icon" aria-hidden="true">close</span>
+                </button>
+              </div>
+              <p class="field-error" id="clothing-error" role="alert" hidden></p>
+            </div>
+
+            <div class="upload-field" data-upload="pet">
+              <h3 id="pet-title">狗狗照片</h3>
+              <div class="input-frame">
+                <input type="file" accept="image/png,image/jpeg,image/webp,.png,.jpg,.jpeg,.webp" hidden>
+                <button type="button" class="dropzone" aria-labelledby="pet-title pet-action" aria-describedby="pet-hint pet-error">
+                  <span class="slot-icon icon" aria-hidden="true">photo_camera</span>
+                  <img class="thumbnail" alt="" hidden>
+                  <span class="slot-copy">
+                    <span class="file-action" id="pet-action">点击上传或拖入图片</span>
+                    <span class="file-hint" id="pet-hint">建议用身体清晰可见的照片</span>
+                  </span>
+                </button>
+                <button type="button" class="icon-button remove-file" aria-label="移除狗狗照片" hidden>
+                  <span class="icon" aria-hidden="true">close</span>
+                </button>
+              </div>
+              <p class="field-error" id="pet-error" role="alert" hidden></p>
+            </div>
+          </div>
+
+          <p class="file-rules">支持 JPG、PNG、WebP，每张不超过 10 MB</p>
+          <p class="form-error" id="form-error" role="alert" hidden></p>
+          <button class="button button-primary generate-button" id="generate" type="submit">
+            <span class="icon" aria-hidden="true">sparkles</span>
+            <span id="generate-label">生成试穿图</span>
+          </button>
+          <p class="privacy-note">
+            <span class="icon" aria-hidden="true">lock</span>
+            <span>仅在生成时将图片发送至 API 易</span>
+          </p>
+        </form>
+      </section>
+
+      <section class="panel result-panel" aria-labelledby="result-title">
+        <div class="panel-header">
+          <div class="heading-icon"><span class="icon" aria-hidden="true">image</span></div>
+          <h2 id="result-title">试穿预览</h2>
+        </div>
+        <div class="result-frame" id="result-frame">
+          <img id="result-image" src="./assets/tryon-example.webp" width="1280" height="960" alt="柴犬穿着砖红色绗缝背心的试穿示例" fetchpriority="high">
+          <span class="example-label" id="example-label">效果示例</span>
+          <div class="loading-overlay" id="loading-overlay" hidden>
+            <span class="spinner" aria-hidden="true"></span>
+            <strong>正在生成试穿图</strong>
+            <span>通常需要几十秒到几分钟</span>
+          </div>
+        </div>
+        <div class="result-footer">
+          <p id="result-status" role="status" aria-live="polite">生成后可预览并下载试穿图</p>
+          <a class="button button-secondary download-button" id="download-image" role="link" aria-disabled="true" download="pawfit-试穿图.png">
+            <span class="icon" aria-hidden="true">download</span>
+            下载图片
+          </a>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <dialog id="settings-dialog" aria-labelledby="settings-title">
+    <form id="settings-form" novalidate>
+      <div class="dialog-header">
+        <h2 id="settings-title">API 设置</h2>
+        <button class="icon-button" id="close-settings" type="button" aria-label="关闭 API 设置">
+          <span class="icon" aria-hidden="true">close</span>
+        </button>
+      </div>
+      <p class="dialog-description">填写 API 易令牌。刷新或关闭页面后，令牌会清除。</p>
+      <label for="api-key">API 密钥</label>
+      <div class="key-field">
+        <input id="api-key" type="password" placeholder="输入 API 易令牌" aria-describedby="key-error" autocomplete="off" spellcheck="false" autocapitalize="off" autofocus>
+        <button class="icon-button" id="toggle-key" type="button" aria-label="显示密钥" aria-pressed="false">
+          <span class="icon" aria-hidden="true">visibility</span>
+        </button>
+      </div>
+      <p class="field-error" id="key-error" role="alert" hidden></p>
+      <a class="token-link" href="https://api.apiyi.com/token" target="_blank" rel="noopener noreferrer">
+        获取 API 易令牌 <span class="icon" aria-hidden="true">open_in_new</span>
+      </a>
+      <div class="dialog-actions">
+        <button class="button button-secondary" id="clear-key" type="button" hidden>清除密钥</button>
+        <button class="button button-primary" type="submit">保存密钥</button>
+      </div>
+    </form>
+  </dialog>
+</body>
+</html>
