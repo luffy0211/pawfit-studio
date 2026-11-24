@@ -11,6 +11,7 @@ const settings = select('#settings-dialog')
 const openSettings = select('#open-settings')
 const keyInput = select('#api-key')
 const keyError = select('#key-error')
+const rememberKey = select('#remember-key')
 const toggleKey = select('#toggle-key')
 const clearKey = select('#clear-key')
 const resultFrame = select('#result-frame')
@@ -24,6 +25,8 @@ const example = { src: resultImage.src, alt: resultImage.alt }
 const maxFileBytes = 10 * 1024 * 1024
 const imageType = /^image\/(jpeg|png|webp)$/i
 const imageExtension = /\.(jpe?g|png|webp)$/i
+const keyPattern = /^[\x21-\x7e]{1,4096}$/
+const keyStorage = 'pawfit-studio:api-key'
 const uploads = Array.from(form.querySelectorAll('[data-upload]'), field => {
   const dropzone = field.querySelector('.dropzone')
   const hint = field.querySelector('.file-hint')
@@ -46,9 +49,19 @@ const uploads = Array.from(form.querySelectorAll('[data-upload]'), field => {
   }
 })
 
-let apiKey = ''
+let apiKey = readSavedKey()
+let keyIsSaved = Boolean(apiKey)
 let busy = false
 let resultUrl = ''
+
+function readSavedKey() {
+  try {
+    const value = localStorage.getItem(keyStorage) ?? ''
+    return keyPattern.test(value) ? value : ''
+  } catch {
+    return ''
+  }
+}
 
 function setError(element, text = '', control) {
   element.textContent = text
@@ -219,6 +232,7 @@ function updateKeyStatus() {
 
 function showSettings() {
   keyInput.value = apiKey
+  rememberKey.checked = keyIsSaved
   setKeyVisibility(false)
   setError(keyError, '', keyInput)
   clearKey.hidden = !apiKey
@@ -229,24 +243,43 @@ openSettings.addEventListener('click', showSettings)
 select('#close-settings').addEventListener('click', () => settings.close())
 toggleKey.addEventListener('click', () => setKeyVisibility(keyInput.type === 'password'))
 keyInput.addEventListener('input', () => setError(keyError, '', keyInput))
+rememberKey.addEventListener('change', () => setError(keyError, '', keyInput))
 
 select('#settings-form').addEventListener('submit', event => {
   event.preventDefault()
   const value = keyInput.value.trim()
-  if (!/^[\x21-\x7e]{1,4096}$/.test(value)) {
+  if (!keyPattern.test(value)) {
     setError(keyError, '请输入 API 易令牌。令牌中不能有空格。', keyInput)
     keyInput.focus()
     return
   }
 
+  try {
+    if (rememberKey.checked) localStorage.setItem(keyStorage, value)
+    else if (keyIsSaved) localStorage.removeItem(keyStorage)
+  } catch {
+    setError(keyError, rememberKey.checked
+      ? '浏览器无法记住密钥。取消勾选后，可在当前页面使用。'
+      : '浏览器无法移除已记住的密钥，请检查网站存储设置。')
+    return
+  }
+
   apiKey = value
+  keyIsSaved = rememberKey.checked
   updateKeyStatus()
   setError(formError)
   settings.close()
 })
 
 clearKey.addEventListener('click', () => {
+  try {
+    if (keyIsSaved) localStorage.removeItem(keyStorage)
+  } catch {
+    setError(keyError, '浏览器无法清除已记住的密钥，请检查网站存储设置。')
+    return
+  }
   apiKey = ''
+  keyIsSaved = false
   updateKeyStatus()
   settings.close()
 })
@@ -255,6 +288,8 @@ settings.addEventListener('close', () => {
   keyInput.value = ''
   setKeyVisibility(false)
 })
+
+updateKeyStatus()
 
 function setBusy(value) {
   busy = value

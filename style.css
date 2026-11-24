@@ -379,6 +379,21 @@ dialog label { display: block; margin-bottom: 7px; font-size: .875rem; font-weig
 .key-field input[aria-invalid="true"] { border-color: #ba554c; }
 .key-field .icon-button { position: absolute; top: 6px; right: 6px; }
 
+dialog label.remember-key {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 44px;
+  margin: 7px 0 0;
+  cursor: pointer;
+}
+.remember-key input {
+  width: 17px;
+  height: 17px;
+  margin: 0;
+  accent-color: var(--accent);
+}
+
 .token-link {
   display: inline-flex;
   align-items: center;

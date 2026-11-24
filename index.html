@@ -9,8 +9,8 @@
   <meta name="referrer" content="no-referrer">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://api.apiyi.com; img-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'self'">
   <title>宠物试衣间 · Pawfit</title>
-  <link rel="stylesheet" href="./style.css">
-  <script type="module" src="./app.js"></script>
+  <link rel="stylesheet" href="./style.css?v=2">
+  <script type="module" src="./app.js?v=2"></script>
 </head>
 <body>
   <header class="site-header">
@@ -126,7 +126,7 @@
           <span class="icon" aria-hidden="true">close</span>
         </button>
       </div>
-      <p class="dialog-description">填写 API 易令牌。刷新或关闭页面后，令牌会清除。</p>
+      <p class="dialog-description">填写 API 易令牌，勾选后下次打开可直接生成。</p>
       <label for="api-key">API 密钥</label>
       <div class="key-field">
         <input id="api-key" type="password" placeholder="输入 API 易令牌" aria-describedby="key-error" autocomplete="off" spellcheck="false" autocapitalize="off" autofocus>
@@ -135,6 +135,10 @@
         </button>
       </div>
       <p class="field-error" id="key-error" role="alert" hidden></p>
+      <label class="remember-key">
+        <input id="remember-key" type="checkbox">
+        在此浏览器记住密钥
+      </label>
       <a class="token-link" href="https://api.apiyi.com/token" target="_blank" rel="noopener noreferrer">
         获取 API 易令牌 <span class="icon" aria-hidden="true">open_in_new</span>
       </a>
